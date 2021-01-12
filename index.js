@@ -1,7 +1,4 @@
-// Dépendances
-
-const mysql = require('mysql')
-
+// Dépendances Express
 
 var express = require("express")
 var app = express()
@@ -9,7 +6,10 @@ var app = express()
 app.use(express.static('public'));
 
 
+
 // Connexion à la BDD
+
+const mysql = require('mysql')
 
 const db = mysql.createConnection({
 	host:"localhost",
@@ -32,6 +32,7 @@ function insert(data){
 	db.query(queryString);
 
 }
+
 
 // TTN :
 
@@ -75,14 +76,15 @@ app.get('/api/panels', function(req, res){
 })
 
 app.get('/api/list', function(req, res) {
-		var data = db.query("SELECT name FROM cabins", function(err, result, fields) {
-		if(err) throw err;
-		res.send(result)
+	var data = db.query("SELECT name FROM cabins", function(err, result, fields) {
+	if(err) throw err;
+	res.send(result)
 	})
 })
 
 app.get('/api/:name', function(req, res){
-	var data = db.query("SELECT production, date FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "'", function(err, result, fields) {
+	var data = db.query("SELECT production, date FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND TIME_TO_SEC(date) > TIME_TO_SEC(now()) - 3600", function(err, result, fields) {
+		console.log(result);
 		if(err) throw err;
 		res.send(result)
 	})
@@ -100,10 +102,10 @@ app.get('/api/sendmode/:id', function(req, res) {
 	res.send("send mode set");
 })
 
-app.get('/api/powermode/:id', function(req, res) {
+app.get('/api/heatingMode/:id', function(req, res) {
 	arduino.send(req.params.id, "03", 1);
-	console.log("Send powermode to " + req.params.id);
-	res.send("power mode set");
+	console.log("Send heating mode to " + req.params.id);
+	res.send("heating mode set");
 })
 
 app.get('/api/settemp/:id/:value', function(req, res) {
@@ -116,7 +118,7 @@ app.get('/api/settemp/:id/:value', function(req, res) {
 app.listen(8080)
 
 
-// Remplir la BDD :
+// Remplir la BDD avec des données random pour les autres panneaux :
 
 function rempliMoi() {
 
@@ -133,16 +135,10 @@ function rempliMoi() {
 	data[3] = Math.floor(Math.random() * 25);
 	
 	insert(data);
-	
 }
 
-
-function flood(nb) {
-	
-	console.log("Call me maybe !");
-	
+function flood(nb) {	
 	for(var i = 0; i < nb; i++) {
 		rempliMoi();
 	}
-
 }

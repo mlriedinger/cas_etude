@@ -1,3 +1,5 @@
+// Récupérer les données de production totale des panneaux et les afficher sous forme de graphique :
+
 function getData() {
 	
 	console.log("Hello ! Is it me you're looking foooooooor ?!");
@@ -10,6 +12,8 @@ function getData() {
 	})
 }
 
+// Récupérer les données de production d'un seul panneau et les afficher sous forme de graphique :
+
 function getDataPanel(name) {
 	
 	console.log(name);
@@ -20,30 +24,24 @@ function getDataPanel(name) {
 
 }
 
+
+
 function getListPanel() {
-		axios.get('/api/list').then(function(response) {
-			console.log(response['data'])
-			for(var i = 0; i < response['data'].length; i++) {
-				var name = response['data'][i].name;
-				document.getElementById("panels").innerHTML += "<button onclick='getDataPanel(\""+ name + "\")'>"+ name + "</button>";
-				document.getElementById("panels").innerHTML += "<button onclick='trackerMode(\""+ name + "\")'> Tracker :"+ name + "</button>";
-				document.getElementById("panels").innerHTML += "<button onclick='sendMode(\""+ name + "\")'> Send :"+ name + "</button>";
-				document.getElementById("panels").innerHTML += "<button onclick='powerMode(\""+ name + "\")'> Power :"+ name + "</button>";
-				document.getElementById("panels").innerHTML += "<input type='number' id='setTemp"+name+"' value='20' disabled/>";
-				document.getElementById("panels").innerHTML += "<button onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>Ok</button><br>";
-				
-			}
-		})
+	axios.get('/api/list').then(function(response) {
+		console.log(response['data'])
+		for(var i = 0; i < response['data'].length; i++) {
+			var name = response['data'][i].name;
+			document.getElementById("panels").innerHTML += "<button onclick='getDataPanel(\""+ name + "\")'>"+ name + "</button>";
+			document.getElementById("panels").innerHTML += "<button onclick='trackerMode(\""+ name + "\")'> Tracker :"+ name + "</button>";
+			document.getElementById("panels").innerHTML += "<button onclick='sendMode(\""+ name + "\")'> Send :"+ name + "</button>";
+			document.getElementById("panels").innerHTML += "<button onclick='powerMode(\""+ name + "\")'> Power :"+ name + "</button>";
+			document.getElementById("panels").innerHTML += "<input type='number' id='setTemp"+name+"' value='20' disabled/>";
+			document.getElementById("panels").innerHTML += "<button onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>Ok</button><br>";
+			
+		}
+	})
 }
 
-function setTemp(name) {
-		temp =  document.getElementById("setTemp"+name).value;
-		
-		console.log('/api/settemp/'+name+'/'+temp);
-		axios.get('/api/settemp/'+name+'/'+temp).then(function(response) {
-			console.log(response['data'])
-		})
-}
 
 function drawChart(name, data){
 	// based on prepared DOM, initialize echarts instance
@@ -125,11 +123,17 @@ function drawChartPanel(name, data){
 	myChart.setOption(option);
 }
 
+
+// Envoi de données à l'Arduino
+// Appelle la route qui envoie une trame à l'arduino pour activer/désactiver le suivi du soleil
+
 function trackerMode(id) {
 	axios.get('/api/trackermode/'+id).then(function(response) {
 		console.log("tracker mode set")
 	})
 }
+
+// Appelle la route qui envoie une trame à l'arduino pour activer/désactiver l'envoi de données par l'Arduino
 
 function sendMode(id) {
 	axios.get('/api/sendmode/'+id).then(function(response) {
@@ -137,13 +141,27 @@ function sendMode(id) {
 	})
 }
 
-function powerMode(id) {
+// Appelle la route qui envoie une trame à l'arduino pour activer/désactiver le relais qui allume le chauffage
+
+function heatingMode(id) {
 	
 	document.getElementById("setTemp"+id).disabled = !document.getElementById("setTemp"+id).disabled;
 	document.getElementById("tempBtn"+id).disabled = !document.getElementById("tempBtn"+id).disabled;
 	
-	axios.get('/api/powermode/'+id).then(function(response) {
-		console.log("power mode set")
+	axios.get('/api/heatingMode/'+id).then(function(response) {
+		console.log("heating mode set")
+	})
+}
+
+
+// Appelle la route qui envoie une trame à l'arduino pour modifier la température
+
+function setTemp(name) {
+	temp =  document.getElementById("setTemp"+name).value;
+	
+	console.log('/api/settemp/'+name+'/'+temp);
+	axios.get('/api/settemp/'+name+'/'+temp).then(function(response) {
+		console.log(response['data'])
 	})
 }
 
