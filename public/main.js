@@ -15,7 +15,7 @@ function getDataPanel(name) {
 	console.log(name);
 	
 	axios.get('/api/'+name).then(function(response) {
-		console.log(response['data'])
+		drawChartPanel(name, response['data'])
 	})
 
 }
@@ -26,7 +26,22 @@ function getListPanel() {
 			for(var i = 0; i < response['data'].length; i++) {
 				var name = response['data'][i].name;
 				document.getElementById("panels").innerHTML += "<button onclick='getDataPanel(\""+ name + "\")'>"+ name + "</button>";
+				document.getElementById("panels").innerHTML += "<button onclick='trackerMode(\""+ name + "\")'> Tracker :"+ name + "</button>";
+				document.getElementById("panels").innerHTML += "<button onclick='sendMode(\""+ name + "\")'> Send :"+ name + "</button>";
+				document.getElementById("panels").innerHTML += "<button onclick='powerMode(\""+ name + "\")'> Power :"+ name + "</button>";
+				document.getElementById("panels").innerHTML += "<input type='number' id='"+name+"' value='20'/>";
+				document.getElementById("panels").innerHTML += "<button onclick='setTemp(\""+ name + "\")'>Ok</button><br>";
+				
 			}
+		})
+}
+
+function setTemp(name) {
+		temp =  document.getElementById(name).value;
+		
+		console.log('/api/settemp/'+name+'/'+temp);
+		axios.get('/api/settemp/'+name+'/'+temp).then(function(response) {
+			console.log(response['data'])
 		})
 }
 
@@ -58,13 +73,74 @@ function drawChart(name, data){
 		},
 		yAxis: {},
 		series: [{
-			name: 'Sales',
+			name: 'Production totale',
 			type: 'bar',
-			data: total
+			data: total,
+			color: '#008080'
 		}]
 	};
+	
 	// use configuration item and data specified to show chart
 	myChart.setOption(option);
+}
+
+function drawChartPanel(name, data){
+	// based on prepared DOM, initialize echarts instance
+	
+	console.log(data);
+	
+	var dates = [];
+	var values = [];
+	
+	for(var i = 0; i < data.length; i++) {
+		
+		dates[i] = new Date(data[i].date).toLocaleTimeString();
+		values[i] = data[i].value; 
+		
+	}
+	
+	var myChart = echarts.init(document.getElementById('panelChart'));
+	// specify chart configuration item and data
+	var option = {
+		title: {
+			text: name
+		},
+		tooltip: {},
+		legend: {
+			data:['Production']
+		},
+		xAxis: {
+			data: dates
+		},
+		yAxis: {},
+		series: [{
+			name: 'Production',
+			type: 'line',
+			data: values,
+			color: '#008080'
+		}]
+	};
+	
+	// use configuration item and data specified to show chart
+	myChart.setOption(option);
+}
+
+function trackerMode(id) {
+	axios.get('/api/trackermode/'+id).then(function(response) {
+		console.log("tracker mode set")
+	})
+}
+
+function sendMode(id) {
+	axios.get('/api/sendmode/'+id).then(function(response) {
+		console.log("send mode set")
+	})
+}
+
+function powerMode(id) {
+	axios.get('/api/powermode/'+id).then(function(response) {
+		console.log("power mode set")
+	})
 }
 
 getData();
