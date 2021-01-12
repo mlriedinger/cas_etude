@@ -1,12 +1,14 @@
 // Récupérer les données de production totale des panneaux et les afficher sous forme de graphique :
 
+let dataPanels;
+
 function getData() {
 	
-	console.log("Hello ! Is it me you're looking foooooooor ?!");
+	//console.log("Hello ! Is it me you're looking foooooooor ?!");
 	
 	axios.get('/api/panels')
 	.then(function(response) {
-		console.log(response['data'])
+		// console.log(response['data'])
 		var data = response['data'];
 		drawChart('Production totale des panneaux', data);
 	})
@@ -16,7 +18,7 @@ function getData() {
 
 function getDataPanel(name) {
 	
-	console.log(name);
+	//console.log(name);
 	
 	axios.get('/api/'+name).then(function(response) {
 		drawChartPanel(name, response['data'])
@@ -25,21 +27,32 @@ function getDataPanel(name) {
 }
 
 
-
 function getListPanel() {
 	axios.get('/api/list').then(function(response) {
-		console.log(response['data'])
-		for(var i = 0; i < response['data'].length; i++) {
-			var name = response['data'][i].name;
-			document.getElementById("panels").innerHTML += "<button onclick='getDataPanel(\""+ name + "\")'>"+ name + "</button>";
-			document.getElementById("panels").innerHTML += "<button onclick='trackerMode(\""+ name + "\")'> Tracker :"+ name + "</button>";
-			document.getElementById("panels").innerHTML += "<button onclick='sendMode(\""+ name + "\")'> Send :"+ name + "</button>";
-			document.getElementById("panels").innerHTML += "<button onclick='powerMode(\""+ name + "\")'> Power :"+ name + "</button>";
-			document.getElementById("panels").innerHTML += "<input type='number' id='setTemp"+name+"' value='20' disabled/>";
-			document.getElementById("panels").innerHTML += "<button onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>Ok</button><br>";
-			
-		}
+		// console.log(response['data'])
+		dataPanels = response['data'];
+		displayButtons();
 	})
+}
+
+function displayButtons(){
+	// console.log(dataPanels);
+	
+	for(var i = 0; i < dataPanels.length; i++) {
+		var name = dataPanels[i].name;
+		
+		var divPanel = document.createElement("div");
+		divPanel.classList.add("col");
+		
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='getDataPanel(\""+ name + "\")'>Production "+ name + "</button>"; 
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='trackerMode(\""+ name + "\")'> Auto tracker mode</button>";
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='sendMode(\""+ name + "\")'> Send data mode</button>";
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='powerMode(\""+ name + "\")'> Heating mode</button>";
+		divPanel.innerHTML += "<input type='number' id='setTemp"+name+"' value='20' disabled/>";
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button>";
+				
+		document.getElementById("panels").appendChild(divPanel);
+		}
 }
 
 
