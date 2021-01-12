@@ -29,15 +29,15 @@ function getListPanel() {
 				document.getElementById("panels").innerHTML += "<button onclick='trackerMode(\""+ name + "\")'> Tracker :"+ name + "</button>";
 				document.getElementById("panels").innerHTML += "<button onclick='sendMode(\""+ name + "\")'> Send :"+ name + "</button>";
 				document.getElementById("panels").innerHTML += "<button onclick='powerMode(\""+ name + "\")'> Power :"+ name + "</button>";
-				document.getElementById("panels").innerHTML += "<input type='number' id='"+name+"' value='20'/>";
-				document.getElementById("panels").innerHTML += "<button onclick='setTemp(\""+ name + "\")'>Ok</button><br>";
+				document.getElementById("panels").innerHTML += "<input type='number' id='setTemp"+name+"' value='20' disabled/>";
+				document.getElementById("panels").innerHTML += "<button onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>Ok</button><br>";
 				
 			}
 		})
 }
 
 function setTemp(name) {
-		temp =  document.getElementById(name).value;
+		temp =  document.getElementById("setTemp"+name).value;
 		
 		console.log('/api/settemp/'+name+'/'+temp);
 		axios.get('/api/settemp/'+name+'/'+temp).then(function(response) {
@@ -95,7 +95,7 @@ function drawChartPanel(name, data){
 	for(var i = 0; i < data.length; i++) {
 		
 		dates[i] = new Date(data[i].date).toLocaleTimeString();
-		values[i] = data[i].value; 
+		values[i] = data[i].production; 
 		
 	}
 	
@@ -138,6 +138,10 @@ function sendMode(id) {
 }
 
 function powerMode(id) {
+	
+	document.getElementById("setTemp"+id).disabled = !document.getElementById("setTemp"+id).disabled;
+	document.getElementById("tempBtn"+id).disabled = !document.getElementById("tempBtn"+id).disabled;
+	
 	axios.get('/api/powermode/'+id).then(function(response) {
 		console.log("power mode set")
 	})
