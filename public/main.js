@@ -40,13 +40,14 @@ function displayButtons(){
 		
 		var divPanel = document.createElement("div");
 		divPanel.classList.add("col");
+		divPanel.classList.add("offset-md-1");
 		
-		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='getDataPanel(\""+ name + "\")'>Production "+ name + "</button>"; 
-		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='trackerMode(\""+ name + "\")'> Auto tracker mode</button>";
-		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='sendMode(\""+ name + "\")'> Send data mode</button>";
-		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='powerMode(\""+ name + "\")'> Heating mode</button>";
-		divPanel.innerHTML += "<input type='number' id='setTemp"+name+"' value='20' disabled/>";
-		divPanel.innerHTML += "<button type='button' class='btn btn-dark' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button>";
+		divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3' onclick='getDataPanel(\""+ name + "\")'>Production "+ name + "</button></div>"; 
+		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='trackerMode(\""+ name + "\")'> Auto tracker mode</button></div>";
+		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='sendMode(\""+ name + "\")'> Send data mode</button></div>";
+		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='powerMode(\""+ name + "\")'> Heating mode</button></div>";
+		divPanel.innerHTML += "<div class='row'><input type='number' class='mb-3' id='setTemp"+name+"' value='20' disabled/></div>";
+		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
 				
 		document.getElementById("panels").appendChild(divPanel);
 		}

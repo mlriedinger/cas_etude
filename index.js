@@ -83,9 +83,8 @@ app.get('/api/list', function(req, res) {
 })
 
 app.get('/api/:name', function(req, res){
-	var data = db.query("SELECT production, date FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > now() - 3600", function(err, result, fields) {
+	var data = db.query("SELECT production, date FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > ADDTIME(now(), '-1:00:00')", function(err, result, fields) {
 	if(err) throw err;
-	console.log(fields);
 	res.send(result)
 	})
 })
