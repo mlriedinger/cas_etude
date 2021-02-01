@@ -3,9 +3,6 @@
 let dataPanels;
 
 function getData() {
-	
-	//console.log("Hello ! Is it me you're looking foooooooor ?!");
-	
 	axios.get('/api/panels')
 	.then(function(response) {
 		// console.log(response['data'])
@@ -14,12 +11,11 @@ function getData() {
 	})
 }
 
+
 // Récupérer les données de production d'un seul panneau et les afficher sous forme de graphique :
 
 function getDataPanel(name) {
-	
 	//console.log(name);
-	
 	axios.get('/api/'+name).then(function(response) {
 		drawChartPanel(name, response['data'])
 	})
@@ -34,6 +30,7 @@ function getListPanel() {
 		displayButtons();
 	})
 }
+
 
 function displayButtons(){
 	// console.log(dataPanels);
