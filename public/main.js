@@ -44,14 +44,14 @@ function displayButtons(){
 		
 		var divPanel = document.createElement("div");
 		divPanel.classList.add("col");
-		divPanel.classList.add("offset-md-1");
+		divPanel.classList.add("p-5");
 		
-		divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3' onclick='getDataPanel(\""+ name + "\")'>Production "+ name + "</button></div>"; 
-		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='trackerMode(\""+ name + "\")'> Auto tracker mode</button></div>";
-		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='sendMode(\""+ name + "\")'> Send data mode</button></div>";
-		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='heatingMode(\""+ name + "\")'> Heating mode</button></div>";
-		divPanel.innerHTML += "<div class='row'><input type='number' class='mb-3' id='setTemp"+name+"' value='"+ temp[i] +"' disabled/></div>";
-		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
+		divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3 btn-sm' onclick='getDataPanel(\""+ name + "\")'>Production "+ name + "</button></div>"; 
+		divPanel.innerHTML += "<button type='button' id='tracker_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='trackerMode(\""+ name + "\")'><i class='fas fa-solar-panel'></i></button>";
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark mb-3 btn-sm' onclick='sendMode(\""+ name + "\")'><i class='fas fa-paper-plane'></i></button>";
+		divPanel.innerHTML += "<button type='button' class='btn btn-dark mb-3 btn-sm' onclick='heatingMode(\""+ name + "\")'><i class='fas fa-fire-alt'></i></button>";
+		divPanel.innerHTML += "<div class='row'><input type='number' class='mb-3' id='setTemp"+name+"' value='"+ temp[i] +"' disabled/>";
+		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3 btn-sm' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
 				
 		document.getElementById("panels").appendChild(divPanel);
 		}
@@ -89,7 +89,13 @@ function drawChart(name, data){
 			name: 'Production totale',
 			type: 'bar',
 			data: total,
-			color: '#008080'
+			color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+				offset: 0,
+				color: '#008080'
+			}, {
+				offset: 1,
+				color: '#FFFFFF'
+			}])
 		}]
 	};
 	
@@ -129,9 +135,20 @@ function drawChartPanel(name, data){
 		series: [{
 			name: 'Production',
 			type: 'line',
+			smooth: 'true',
 			data: values,
-			color: '#008080'
-		}]
+			color: '#008080',
+		areaStyle: {
+                opacity: 0.8,
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: '#008080'
+                }, {
+                    offset: 1,
+                    color: '#FFFFFF'
+                }])
+            }
+         }]
 	};
 	
 	// use configuration item and data specified to show chart
@@ -144,6 +161,7 @@ function drawChartPanel(name, data){
 
 function trackerMode(id) {
 	axios.get('/api/trackermode/'+id).then(function(response) {
+		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-success mb-3 btn-sm' ? 'btn btn-danger mb-3 btn-sm' : 'btn btn-success mb-3 btn-sm';
 		console.log("tracker mode set")
 	})
 }
