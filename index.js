@@ -69,7 +69,7 @@ app.get('/', function(req, res){
 })
 
 app.get('/api/panels', function(req, res){
-	var data = db.query("SELECT name, location, SUM(production) AS total, date FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id GROUP BY name", function(err, result, fields) {
+	var data = db.query("SELECT name, location, SUM(production) AS total, date, temperature FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id GROUP BY name", function(err, result, fields) {
 		if(err) throw err;
 		res.send(result)
 	})
@@ -90,6 +90,7 @@ app.get('/api/:name', function(req, res){
 })
 
 app.get('/api/trackermode/:id', function(req, res) {
+	
 	arduino.send(req.params.id, "01", 1);
 	console.log("Send trackermode to " + req.params.id);
 	res.send("tracker mode set");
@@ -109,8 +110,8 @@ app.get('/api/heatingMode/:id', function(req, res) {
 
 app.get('/api/settemp/:id/:value', function(req, res) {
 	var nb = parseInt(req.params.value);
-	arduino.send(req.params.id, "" + nb.toString(16) + "", 1);
-	console.log("Send temp to " + req.params.id + " : " + nb);
+	arduino.send(req.params.id, "" + nb.toString(16) > 16 ? nb.toString(16) : '0'+nb.toString(16) + "", 1);
+	console.log("Send temp to " + req.params.id + " : " + nb.toString(16));
 	res.send("temp set");
 });
 
