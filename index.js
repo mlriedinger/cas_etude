@@ -1,47 +1,43 @@
 // Dépendances Express
+var express = require("express");
+var app = express();
 
-var express = require("express")
-var app = express()
-
+// On sert l'intégralité du dossier "public" avec Express
 app.use(express.static('public'));
 
-
+/* ------------------------------------------------------------------------- */
 
 // Connexion à la BDD
-
-const mysql = require('mysql')
-
+const mysql = require('mysql');
 const db = mysql.createConnection({
 	host:"localhost",
 	user: "mlo",
 	password: "campus1234",
 	database: "case_study_dev",
 	insecureAuth: true
-})
-
+});
 db.connect(function(err){
 	if(err) throw err;
 	console.log("Connecté à la BDD !");
-})
+});
 
-// Insertion de données dans la BDD
-
+// Insertion des données dans la BDD
 function insert(data){
-
-	var queryString = "insert into data(fk_panel_id, production, date, temperature) values((select id from cabins where name ='"+data[2]+"'), "+data[0]+", now(), " +data[3]+")";
-	db.query(queryString);
-
+	var insertQuery = "insert into data(fk_panel_id, production, date, temperature) values((select id from cabins where name ='"+data[2]+"'), "+data[0]+", now(), " +data[3]+")";
+	db.query(insertQuery);
 }
 
+/* ------------------------------------------------------------------------- */
 
-// TTN :
+// Variables de connexion à TheThingsNetwork (TTN)
+const appID = "survivor";
+const accessKey = "ttn-account-v2.8ojO0dV9Y-mOV60-Fmt0RLD7h6skH2o-hcwbWDVlNsI";
 
-const appID = "survivor"
-const accessKey = "ttn-account-v2.8ojO0dV9Y-mOV60-Fmt0RLD7h6skH2o-hcwbWDVlNsI"
-
-const ttn = require("ttn")
+// Connexion à TheThingsNetwork (TTN)
+const ttn = require("ttn");
 const arduino = new ttn.DataClient(appID, accessKey, 'eu.thethings.network:1883'); // Objet TTN pour envoyer des données à l'arduino
 
+// Réception des messages uplink de TTN
 ttn.data(appID, accessKey).then(function(client) {
 		client.on("uplink", function(devID, payload) {
 			var data = []
@@ -49,65 +45,74 @@ ttn.data(appID, accessKey).then(function(client) {
 			data[1] = payload['metadata']['time']
 			data[2] = payload['dev_id']
 			data[3] = payload['payload_fields']['Temp']
-			console.log(data)
-			insert(data)
-			rempliMoi();
-		})
+			console.log(data);
+			
+			if(data[0] > 0) insert(data);
+				rempliMoi(data);
+		});
 }).catch(function(error) {
 		console.error("Error", error)
 		process.exit(1)
-})
+});
 
+/* ------------------------------------------------------------------------- */
 
+// Routes
 
-// Routes :
-
-
+// Page d'accueil
 app.get('/', function(req, res){
 	res.sendFile('index.html');
 	res.sendFile('main.js');
-})
+});
 
+// Récupère et renvoie les données de production totale de tous les panneaux
 app.get('/api/panels', function(req, res){
-	var data = db.query("SELECT name, location, SUM(production) AS total, date, temperature FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id GROUP BY name", function(err, result, fields) {
-		if(err) throw err;
-		res.send(result)
-	})
-})
+	var data = db.query("SELECT name, location, SUM(production) AS total, date, temperature, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id GROUP BY name", function(err, result, fields) {
+	if(err) throw err;
+	res.send(result);
+	});
+});
 
+// Récupère et renvoie la liste des noms des panneaux
 app.get('/api/list', function(req, res) {
-	var data = db.query("SELECT name FROM cabins", function(err, result, fields) {
+	var data = db.query("SELECT name, pseudo FROM cabins", function(err, result, fields) {
 	if(err) throw err;
-	res.send(result)
-	})
-})
+	res.send(result);
+	});
+});
 
+// Récupère et renvoie les données de production d'un panneau au cours de la dernière heure écoulée
 app.get('/api/:name', function(req, res){
-	var data = db.query("SELECT production, date FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > ADDTIME(now(), '-1:00:00')", function(err, result, fields) {
+	var data = db.query("SELECT production, date, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > ADDTIME(now(), '-1:00:00')", function(err, result, fields) {
 	if(err) throw err;
-	res.send(result)
-	})
-})
+	//console.log(result);
+	res.send(result);
+	});
+});
 
+// Envoie un message downlink à l'Arduino pour activer/désactiver la fonction tracker
 app.get('/api/trackermode/:id', function(req, res) {
 	
 	arduino.send(req.params.id, "01", 1);
 	console.log("Send trackermode to " + req.params.id);
 	res.send("tracker mode set");
-})
+});
 
+// Envoie un message downlink à l'Arduino pour activer/désactiver la fonction d'envoi de données
 app.get('/api/sendmode/:id', function(req, res) {
 	arduino.send(req.params.id, "02", 1);
 	console.log("Send sendmode to " + req.params.id);
 	res.send("send mode set");
-})
+});
 
+// Envoie un message downlink à l'Arduino pour activer/désactiver la fonction chauffage
 app.get('/api/heatingMode/:id', function(req, res) {
 	arduino.send(req.params.id, "03", 1);
 	console.log("Send heating mode to " + req.params.id);
 	res.send("heating mode set");
-})
+});
 
+// Envoie un message downlink à l'Arduino pour modifier la température désirée
 app.get('/api/settemp/:id/:value', function(req, res) {
 	var nb = parseInt(req.params.value);
 	arduino.send(req.params.id, "" + nb.toString(16) > 16 ? nb.toString(16) : '0'+nb.toString(16) + "", 1);
@@ -115,28 +120,46 @@ app.get('/api/settemp/:id/:value', function(req, res) {
 	res.send("temp set");
 });
 
-app.listen(8080)
+/* ------------------------------------------------------------------------- */
 
+// Express écoute le port 8080
+app.listen(8080);
 
-// Remplir la BDD avec des données random pour les autres panneaux :
+/* ------------------------------------------------------------------------- */
 
-function rempliMoi() {
+// Remplit la BDD avec des données random pour les autres panneaux
+function rempliMoi(trackerValues) {
 
 	var data = [];
+	let up = Math.floor(Math.random() * 10);
 	
 	data[2] = 'Panneau_1';
-	data[0] = Math.floor(Math.random() * 254);
-	data[3] = Math.floor(Math.random() * 25);
 	
+	if(trackerValues[0] > 10) {
+		data[0] = up > 5 ? trackerValues[0] + Math.floor(Math.random() * 10) : trackerValues[0] - Math.floor(Math.random() * 10);
+		data[3] = up > 5 ? trackerValues[3] + Math.floor(Math.random() * 3) : trackerValues[3] - Math.floor(Math.random() * 3);
+	} else {
+		data[0] = trackerValues[0] + Math.floor(Math.random() * 10);
+		data[3] = trackerValues[3] + Math.floor(Math.random() * 3);
+	}
+
 	insert(data);
 	
+	up = Math.floor(Math.random() * 10);
 	data[2] = 'Panneau_2';
-	data[0] = Math.floor(Math.random() * 254);
-	data[3] = Math.floor(Math.random() * 25);
+
+	if(trackerValues[0] > 10) {
+		data[0] = up > 5 ? trackerValues[0] + Math.floor(Math.random() * 10) : trackerValues[0] - Math.floor(Math.random() * 10);
+		data[3] = up > 5 ? trackerValues[3] + Math.floor(Math.random() * 3) : trackerValues[3] - Math.floor(Math.random() * 3);
+	} else {
+		data[0] = trackerValues[0] + Math.floor(Math.random() * 10);
+		data[3] = trackerValues[3] + Math.floor(Math.random() * 3);
+	}
 	
 	insert(data);
 }
 
+// Fonction qui flood la BDD en cas de besoin
 function flood(nb) {	
 	for(var i = 0; i < nb; i++) {
 		rempliMoi();
