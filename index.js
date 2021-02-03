@@ -75,7 +75,7 @@ app.get('/api/panels', function(req, res){
 
 // Récupère et renvoie la liste des noms des panneaux
 app.get('/api/list', function(req, res) {
-	var data = db.query("SELECT name, pseudo FROM cabins", function(err, result, fields) {
+	var data = db.query("SELECT name, pseudo, pseudo, location FROM cabins", function(err, result, fields) {
 	if(err) throw err;
 	res.send(result);
 	});

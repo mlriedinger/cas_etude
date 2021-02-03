@@ -40,19 +40,21 @@ function displayButtons(){
 	for(var i = 0; i < dataPanels.length; i++) {
 		var name = dataPanels[i].name;
 		var pseudo = dataPanels[i].pseudo;
+		var location = dataPanels[i].location;
 		
 		var divPanel = document.createElement("div");
 		divPanel.classList.add("col");
 		divPanel.classList.add("p-5");
 		
-		divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3 btn-sm' data-bs-toggle='modal' data-bs-target='#exampleModal' onclick='getDataPanel(\""+ name + "\")' data-bs-whatever='" + pseudo + "'>Production "+ pseudo + "</button></div>"; 
+		divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3 btn-sm' data-bs-toggle='modal' data-bs-target='#exampleModal' onclick='getDataPanel(\""+ name + "\")' data-bs-whatever='" + pseudo + "'>Production "+ pseudo + "</button></div>";
+		divPanel.innerHTML += "<p style='font-style: italic;'>"+ location + "</p>";
 		divPanel.innerHTML += "<button type='button' id='tracker_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='trackerMode(\""+ name + "\")'><i class='fas fa-solar-panel'></i></button>";
 		divPanel.innerHTML += "<button type='button' id='send_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='sendMode(\""+ name + "\")'><i class='fas fa-paper-plane'></i></button>";
 		divPanel.innerHTML += "<button type='button' id='heat_button_"+ name +"' class='btn btn-danger mb-3 btn-sm' onclick='heatingMode(\""+ name + "\")'><i class='fas fa-fire-alt'></i></button>";
 		divPanel.innerHTML += "<div class='row'><input type='number' class='mb-3' id='setTemp"+name+"' value='"+ temperature[i] +"' disabled/>";
 		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3 btn-sm' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
 				
-		document.getElementById("panels").appendChild(divPanel);
+		document.getElementById("showProductionButton").appendChild(divPanel);
 		};
 };
 
@@ -76,15 +78,20 @@ function drawChart(name, data){
 			text: name
 		},
 		tooltip: {
-			confine: true
+			confine: true,
 		},
 		legend: {
 			data:['Production']
 		},
 		xAxis: {
-			data: names
+			data: names,
+			fontWeight: 'bold'
 		},
-		yAxis: {},
+		yAxis: {
+			name: 'kW/h',
+			nameLocation: 'start',
+			fontWeight: 'bold'
+		},
 		series: [{
 			name: 'Production totale',
 			type: 'bar',
