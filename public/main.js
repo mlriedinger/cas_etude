@@ -18,7 +18,7 @@ function getData() {
 function getDataPanel(name) {
 	//console.log(name);
 	axios.get('/api/'+name).then(function(response) {
-		//console.log(response);
+		console.log(response);
 		drawChartPanel(response['data'][0]['pseudo'], response['data'])
 	});
 };
@@ -27,7 +27,7 @@ function getDataPanel(name) {
 // Consomme l'API avec Axios pour récupérer les noms des panneaux, puis appelle la fonction qui affiche les boutons de commande
 function getListPanel() {
 	axios.get('/api/list').then(function(response) {
-		// console.log(response['data'])
+		console.log(response['data'])
 		dataPanels = response['data'];
 		displayButtons();
 	});
@@ -41,20 +41,54 @@ function displayButtons(){
 		var name = dataPanels[i].name;
 		var pseudo = dataPanels[i].pseudo;
 		var location = dataPanels[i].location;
+		var picture = dataPanels[i].picture;
+		var description = dataPanels[i].description;
+		//console.log(picture);
 		
 		var divPanel = document.createElement("div");
 		divPanel.classList.add("col");
-		divPanel.classList.add("p-5");
+		divPanel.classList.add("sm-6");
 		
-		divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3 btn-sm' data-bs-toggle='modal' data-bs-target='#exampleModal' onclick='getDataPanel(\""+ name + "\")' data-bs-whatever='" + pseudo + "'>Production "+ pseudo + "</button></div>";
-		divPanel.innerHTML += "<p style='font-style: italic;'>"+ location + "</p>";
-		divPanel.innerHTML += "<button type='button' id='tracker_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='trackerMode(\""+ name + "\")'><i class='fas fa-solar-panel'></i></button>";
-		divPanel.innerHTML += "<button type='button' id='send_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='sendMode(\""+ name + "\")'><i class='fas fa-paper-plane'></i></button>";
-		divPanel.innerHTML += "<button type='button' id='heat_button_"+ name +"' class='btn btn-danger mb-3 btn-sm' onclick='heatingMode(\""+ name + "\")'><i class='fas fa-fire-alt'></i></button>";
-		divPanel.innerHTML += "<div class='row'><input type='number' class='mb-3' id='setTemp"+name+"' value='"+ temperature[i] +"' disabled/>";
-		divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3 btn-sm' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
-				
-		document.getElementById("showProductionButton").appendChild(divPanel);
+		//divPanel.innerHTML += "<div class='row'><button class='btn btn-dark mb-3 btn-sm' data-bs-toggle='modal' data-bs-target='#exampleModal' onclick='getDataPanel(\""+ name + "\")' data-bs-whatever='" + pseudo + "'>Production "+ pseudo + "</button></div>";
+		//divPanel.innerHTML += "<p style='font-style: italic;'>"+ location + "</p>";
+		//divPanel.innerHTML += "<button type='button' id='tracker_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='trackerMode(\""+ name + "\")'><i class='fas fa-solar-panel'></i></button>";
+		//divPanel.innerHTML += "<button type='button' id='send_button_"+ name +"' class='btn btn-success mb-3 btn-sm' onclick='sendMode(\""+ name + "\")'><i class='fas fa-paper-plane'></i></button>";
+		//divPanel.innerHTML += "<button type='button' id='heat_button_"+ name +"' class='btn btn-danger mb-3 btn-sm' onclick='heatingMode(\""+ name + "\")'><i class='fas fa-fire-alt'></i></button>";
+		//divPanel.innerHTML += "<div class='row'><input type='number' class='mb-3' id='setTemp"+name+"' value='"+ temperature[i] +"' disabled/>";
+		//divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3 btn-sm' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
+		
+		var html = [
+			'<div class="card mb-5">',
+				'<img src="' + picture + '" alt="Une photo de chalet" class="card-img-top" style="height: 200px"/>',
+				'<div class="card-body">',
+					'<h5 class="card-title">'+ pseudo + " / " + location +'</h5>',
+					'<p class="card-text" style="text-align:justify;">' + description + '</p>',
+				'</div>',				
+				'<ul class="list-group list-group-flush">',
+					'<li class="list-group-item d-grid gap-2 d-flex justify-content-md-center align-items-center">',
+						'<button class="btn btn-dark btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="getDataPanel(\''+ name + '\')" data-bs-whatever="' + pseudo + '">Production '+ pseudo + '</button></li>',
+					'</li>',
+					'<li class="list-group-item d-grid gap-2 d-md-flex align-items-center justify-content-md-center">',
+						'<button type="button" id="tracker_button_'+ name +'" class="btn btn-success btn-lg" onclick="trackerMode(\''+ name + '\')">',
+							'<i class="fas fa-solar-panel"></i>',
+						'</button>', 
+						'<button type="button" id="send_button_'+ name +'" class="btn btn-success btn-lg" onclick="sendMode(\''+ name + '\')">',
+							'<i class="fas fa-paper-plane"></i>',
+						'</button>',
+					'</li>',
+					'<li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-center">',
+						'<button type="button" id="heat_button_'+ name +'" class="btn btn-success btn-lg" onclick="heatingMode(\''+ name + '\')">',
+							'<i class="fas fa-fire-alt"></i>',
+						'</button>',
+						'<input type="number" class="form-control" id="setTemp'+name+'" value="'+ temperature[i] +'" disabled/>',
+						'<button type="button" class="btn btn-dark btn-lg" onclick="setTemp(\'' + name + '\')" id="tempBtn' + name + '" disabled>OK</button>',
+					'</li>',
+				'</ul>',
+			'</div>'
+		].join('');
+		
+		divPanel.innerHTML += html;
+		document.getElementById("groupButtons").appendChild(divPanel);
 		};
 };
 

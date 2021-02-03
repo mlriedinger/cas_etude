@@ -75,7 +75,7 @@ app.get('/api/panels', function(req, res){
 
 // Récupère et renvoie la liste des noms des panneaux
 app.get('/api/list', function(req, res) {
-	var data = db.query("SELECT name, pseudo, pseudo, location FROM cabins", function(err, result, fields) {
+	var data = db.query("SELECT name, pseudo, picture, description, location FROM cabins", function(err, result, fields) {
 	if(err) throw err;
 	res.send(result);
 	});
@@ -83,7 +83,7 @@ app.get('/api/list', function(req, res) {
 
 // Récupère et renvoie les données de production d'un panneau au cours de la dernière heure écoulée
 app.get('/api/:name', function(req, res){
-	var data = db.query("SELECT production, date, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > ADDTIME(now(), '-1:00:00')", function(err, result, fields) {
+	var data = db.query("SELECT production, date, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > ADDTIME((SELECT date FROM data ORDER BY date DESC LIMIT 1), '-1:00:00')", function(err, result, fields) {
 	if(err) throw err;
 	//console.log(result);
 	res.send(result);
