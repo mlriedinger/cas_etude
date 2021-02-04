@@ -18,7 +18,7 @@ function getData() {
 function getDataPanel(name) {
 	//console.log(name);
 	axios.get('/api/'+name).then(function(response) {
-		console.log(response);
+		//console.log(response);
 		drawChartPanel(response['data'][0]['pseudo'], response['data'])
 	});
 };
@@ -27,7 +27,7 @@ function getDataPanel(name) {
 // Consomme l'API avec Axios pour récupérer les noms des panneaux, puis appelle la fonction qui affiche les boutons de commande
 function getListPanel() {
 	axios.get('/api/list').then(function(response) {
-		console.log(response['data'])
+		//console.log(response['data'])
 		dataPanels = response['data'];
 		displayButtons();
 	});

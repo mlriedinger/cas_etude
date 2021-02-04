@@ -1,9 +1,14 @@
 // Dépendances Express
-var express = require("express");
-var app = express();
+const express = require("express");
+const app = express();
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+
 
 // On sert l'intégralité du dossier "public" avec Express
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true}));
+app.use(cookieParser());
 
 /* ------------------------------------------------------------------------- */
 
@@ -59,10 +64,38 @@ ttn.data(appID, accessKey).then(function(client) {
 
 // Routes
 
-// Page d'accueil
+// Page de connexion
 app.get('/', function(req, res){
 	res.sendFile('index.html');
-	res.sendFile('main.js');
+	res.sendFile('connexion.js');
+});
+
+// Page d'accueil
+app.get('/monitoring', function(req, res){
+	console.log("mlo\n\n\n");
+	console.log(req.cookies['Connexion']);
+	if(req.cookies['Connexion'] > 0) {
+		app.use(express.static('private'));
+		res.sendFile(__dirname + '/private/monitoring.html');
+		//res.sendFile(__dirname + '/private/main.js');
+		//res.sendFile(__dirname + '/private/style.css');
+	} else res.redirect('../../index.html?error');
+});
+
+// Récupère et renvoie les données de connexion d'un utilisateur
+app.post('/api/connexion/', function(req, res){
+	//console.log(req.body);
+	var data = db.query("SELECT login from users WHERE login='" + req.body.login + "' AND password='" + req.body.password +"'", function(err, result, fields){
+		if(err) throw err;
+		console.log(result.length);
+		if(result.length > 0) {
+			res.cookie('Connexion', Math.random().toString());
+			res.redirect('/monitoring');
+		}
+		else {
+			res.redirect('../../index.html?error');
+		}
+	});
 });
 
 // Récupère et renvoie les données de production totale de tous les panneaux
