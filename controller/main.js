@@ -62,29 +62,29 @@ function displayButtons(){
 				'<img src="' + picture + '" alt="Une photo de chalet" class="card-img-top" style="height: 200px"/>',
 				'<div class="card-body">',
 					'<h5 class="card-title">'+ pseudo + " / " + location +'</h5>',
-					'<p class="card-text" style="text-align:justify; height: 175px;">' + description + '</p>',
+					'<p class="card-text" style="text-align:justify; height: 185px;">' + description + '</p>',
 				'</div>',				
 				'<ul class="list-group list-group-flush">',
 					'<li class="list-group-item d-grid gap-2 d-flex justify-content-md-center align-items-center">',
-						'<button class="btn btn-dark btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="getDataPanel(\''+ name + '\')" data-bs-whatever="' + pseudo + '">Production '+ pseudo + '</button></li>',
+						'<button class="btn btn-light btn-lg mt-3 mb-3" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="getDataPanel(\''+ name + '\')" data-bs-whatever="' + pseudo + '">Production '+ pseudo + '</button></li>',
 					'</li>',
 					'<li class="list-group-item d-grid gap-2 d-md-flex align-items-center justify-content-md-center">',
-						'<button type="button" id="tracker_button_'+ name +'" class="btn btn-success btn-lg" onclick="trackerMode(\''+ name + '\')">',
+						'<button type="button" id="tracker_button_'+ name +'" class="btn btn-lg mt-3 mb-3" style="background-color:#009999; color: #FFFFFF" onclick="trackerMode(\''+ name + '\')">',
 							'<i class="fas fa-solar-panel"></i>',
 						'</button>', 
-						'<button type="button" id="send_button_'+ name +'" class="btn btn-success btn-lg" onclick="sendMode(\''+ name + '\')">',
+						'<button type="button" id="send_button_'+ name +'" class="btn btn-lg mt-3 mb-3" style="background-color:#009999; color: #FFFFFF" onclick="sendMode(\''+ name + '\')">',
 							'<i class="fas fa-paper-plane"></i>',
 						'</button>',
-						'<button type="button" id="init_button_'+ name +'" class="btn btn-success btn-lg" onclick="init(\''+ name + '\')">',
+						'<button type="button" id="init_button_'+ name +'" class="btn btn-light btn-lg mt-3 mb-3" onclick="init(\''+ name + '\')">',
 							'<i class="fas fa-undo"></i>',
 						'</button>',
 					'</li>',
 					'<li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-center">',
-						'<button type="button" id="heat_button_'+ name +'" class="btn btn-success btn-lg" onclick="heatingMode(\''+ name + '\')">',
+						'<button type="button" id="heat_button_'+ name +'" class="btn btn-danger btn-lg mt-3 mb-3" onclick="heatingMode(\''+ name + '\')">',
 							'<i class="fas fa-fire-alt"></i>',
 						'</button>',
-						'<input type="number" class="form-control" id="setTemp'+name+'" value="'+ temperature[i] +'" disabled/>',
-						'<button type="button" class="btn btn-dark btn-lg" onclick="setTemp(\'' + name + '\')" id="tempBtn' + name + '" disabled>OK</button>',
+						'<input type="number" class="form-control mt-3 mb-3" id="setTemp'+name+'" value="'+ temperature[i] + '" disabled/>',
+						'<button type="button" class="btn btn-dark btn-lg mt-3 mb-3" onclick="setTemp(\'' + name + '\')" id="tempBtn' + name + '" disabled>OK</button>',
 					'</li>',
 				'</ul>',
 			'</div>'
@@ -210,14 +210,14 @@ function drawChartPanel(name, data){
 // Appelle la route qui envoie une trame à l'arduino pour activer/désactiver le suivi du soleil
 function trackerMode(id) {
 	axios.get('/api/trackermode/'+id).then(function(response) {
-		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-success btn-lg' ? 'btn btn-danger btn-lg' : 'btn btn-success btn-lg';
+		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-dark btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-dark btn-lg mt-3 mb-3';
 		console.log("tracker mode set")
 	});
 };
 
 // Appelle la route qui envoie une trame à l'arduino pour activer/désactiver l'envoi de données par l'Arduino
 function sendMode(id) {
-	document.getElementById("send_button_"+id).className = document.getElementById("send_button_"+id).className == 'btn btn-success btn-lg' ? 'btn btn-danger btn-lg' : 'btn btn-success btn-lg';
+	document.getElementById("send_button_"+id).className = document.getElementById("send_button_"+id).className == 'btn btn-dark btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-dark btn-lg mt-3 mb-3';
 	
 	axios.get('/api/sendmode/'+id).then(function(response) {
 		console.log("send mode set")
@@ -236,7 +236,7 @@ function init(id) {
 function heatingMode(id) {
 	document.getElementById("setTemp"+id).disabled = !document.getElementById("setTemp"+id).disabled;
 	document.getElementById("tempBtn"+id).disabled = !document.getElementById("tempBtn"+id).disabled;
-	document.getElementById("heat_button_"+id).className = document.getElementById("heat_button_"+id).className == 'btn btn-success mb-3 btn-sm' ? 'btn btn-danger mb-3 btn-sm' : 'btn btn-success mb-3 btn-sm';
+	document.getElementById("heat_button_"+id).className = document.getElementById("heat_button_"+id).className == 'btn btn-success btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-success btn-lg mt-3 mb-3';
 	
 	axios.get('/api/heatingMode/'+id).then(function(response) {
 		console.log("heating mode set")
