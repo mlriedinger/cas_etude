@@ -1,7 +1,28 @@
-h1{
-	margin-bottom: 3em;
+h1, h2, h3 {
+	text-align: center;
 }
 
+header{
+	color: #FFFFFF;
+}
 
+h1, h2{
+	font-family: 'Chakra Petch', serif;
+	font-size: 4em;
+}
+
+h3, label{
+	font-family: 'Bai Jamjuree', serif;
+	font-size: 2em;
+}
+
+body{
+	font-family: 'Bai Jamjuree', serif;
+}
+
+img{
+	width:50vw;
+	border-radius: 0.5em;
+}
 
 
