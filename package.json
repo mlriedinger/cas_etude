@@ -2,7 +2,7 @@
   "name": "app",
   "version": "1.0.0",
   "description": "Notre application de monitoring",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,6 +13,7 @@
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
     "mysql": "^2.18.1",
-    "ttn": "^2.3.3"
+    "ttn": "^2.3.3",
+    "ejs": "3.1.5"
   }
 }

@@ -6,9 +6,13 @@ const bodyParser = require('body-parser');
 
 
 // On sert l'intégralité du dossier "public" avec Express
-app.use(express.static('public'));
+//app.use(express.static('public'));
+
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(cookieParser());
+
+// On définit EJS comme moteur de visualisation pour rendre des vues
+app.set('view engine', 'ejs');
 
 /* ------------------------------------------------------------------------- */
 
@@ -66,20 +70,15 @@ ttn.data(appID, accessKey).then(function(client) {
 
 // Page de connexion
 app.get('/', function(req, res){
-	res.sendFile('index.html');
-	res.sendFile('connexion.js');
+	res.render('index', {error: ''});
 });
 
 // Page d'accueil
 app.get('/monitoring', function(req, res){
-	console.log("mlo\n\n\n");
 	console.log(req.cookies['Connexion']);
 	if(req.cookies['Connexion'] > 0) {
-		app.use(express.static('private'));
-		res.sendFile(__dirname + '/private/monitoring.html');
-		//res.sendFile(__dirname + '/private/main.js');
-		//res.sendFile(__dirname + '/private/style.css');
-	} else res.redirect('../../index.html?error');
+		res.render('monitoring');
+	} else res.render('index', {error: 'connexion'});
 });
 
 // Récupère et renvoie les données de connexion d'un utilisateur
@@ -93,7 +92,7 @@ app.post('/api/connexion/', function(req, res){
 			res.redirect('/monitoring');
 		}
 		else {
-			res.redirect('../../index.html?error');
+			res.render('index', {error: 'connexion'});
 		}
 	});
 });
@@ -145,6 +144,13 @@ app.get('/api/heatingMode/:id', function(req, res) {
 	res.send("heating mode set");
 });
 
+// Envoie un message downlink à l'Arduino pour l'initialisation du panneau
+app.get('/api/init/:id', function(req, res) {
+	arduino.send(req.params.id, "04", 1);
+	console.log("Send init to " + req.params.id);
+	res.send("init set");
+});
+
 // Envoie un message downlink à l'Arduino pour modifier la température désirée
 app.get('/api/settemp/:id/:value', function(req, res) {
 	var nb = parseInt(req.params.value);
@@ -152,6 +158,18 @@ app.get('/api/settemp/:id/:value', function(req, res) {
 	console.log("Send temp to " + req.params.id + " : " + nb.toString(16));
 	res.send("temp set");
 });
+
+app.get('/main.js', function(req, res) {
+	if(req.cookies['Connexion'] > 0) res.sendFile(__dirname + '/controller/main.js');
+	else res.render('index', {error: 'connexion'});
+});
+
+app.get('/style.css', function(req, res) {
+	if(req.cookies['Connexion'] > 0) res.sendFile(__dirname + '/views/style.css');
+	else res.render('index', {error: 'connexion'});
+});
+
+
 
 /* ------------------------------------------------------------------------- */
 

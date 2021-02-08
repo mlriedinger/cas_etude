@@ -62,7 +62,7 @@ function displayButtons(){
 				'<img src="' + picture + '" alt="Une photo de chalet" class="card-img-top" style="height: 200px"/>',
 				'<div class="card-body">',
 					'<h5 class="card-title">'+ pseudo + " / " + location +'</h5>',
-					'<p class="card-text" style="text-align:justify;">' + description + '</p>',
+					'<p class="card-text" style="text-align:justify; height: 175px;">' + description + '</p>',
 				'</div>',				
 				'<ul class="list-group list-group-flush">',
 					'<li class="list-group-item d-grid gap-2 d-flex justify-content-md-center align-items-center">',
@@ -74,6 +74,9 @@ function displayButtons(){
 						'</button>', 
 						'<button type="button" id="send_button_'+ name +'" class="btn btn-success btn-lg" onclick="sendMode(\''+ name + '\')">',
 							'<i class="fas fa-paper-plane"></i>',
+						'</button>',
+						'<button type="button" id="init_button_'+ name +'" class="btn btn-success btn-lg" onclick="init(\''+ name + '\')">',
+							'<i class="fas fa-undo"></i>',
 						'</button>',
 					'</li>',
 					'<li class="list-group-item d-grid gap-2 d-md-flex justify-content-md-center">',
@@ -207,17 +210,25 @@ function drawChartPanel(name, data){
 // Appelle la route qui envoie une trame à l'arduino pour activer/désactiver le suivi du soleil
 function trackerMode(id) {
 	axios.get('/api/trackermode/'+id).then(function(response) {
-		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-success mb-3 btn-sm' ? 'btn btn-danger mb-3 btn-sm' : 'btn btn-success mb-3 btn-sm';
+		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-success btn-lg' ? 'btn btn-danger btn-lg' : 'btn btn-success btn-lg';
 		console.log("tracker mode set")
 	});
 };
 
 // Appelle la route qui envoie une trame à l'arduino pour activer/désactiver l'envoi de données par l'Arduino
 function sendMode(id) {
-	document.getElementById("send_button_"+id).className = document.getElementById("send_button_"+id).className == 'btn btn-success mb-3 btn-sm' ? 'btn btn-danger mb-3 btn-sm' : 'btn btn-success mb-3 btn-sm';
+	document.getElementById("send_button_"+id).className = document.getElementById("send_button_"+id).className == 'btn btn-success btn-lg' ? 'btn btn-danger btn-lg' : 'btn btn-success btn-lg';
 	
 	axios.get('/api/sendmode/'+id).then(function(response) {
 		console.log("send mode set")
+	});
+};
+
+// Appelle la route qui envoie une trame à l'arduino pour initialiser le panneau
+function init(id) {
+	
+	axios.get('/api/init/'+id).then(function(response) {
+		console.log("init set")
 	});
 };
 

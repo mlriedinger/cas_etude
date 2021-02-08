@@ -1,18 +1,7 @@
 <!doctype html>
 <html lang="fr">
   <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        
-        <title>Solar panels production</title>
-        
-        <!-- Bootstrap CSS CDN-->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-        <!-- Font Awesome CDN -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
-        
-        <link rel="stylesheet" href="./style.css"/>
-        
+        <%- include('./head'); %>
   </head>
   
   <body>
@@ -23,6 +12,8 @@
         
         <!-- div pour afficher le graphique de production totale -->
         <div class="row" id="main" style="width:100%;height:600px;"></div>
+        
+        <h2 class="mb-5 mt-5 text-center">Gestion des installations</h2>
         
         <!-- div pour afficher les boutons de commande de chaque panneau -->
         <div class="row mt-5" id="groupButtons"></div>     
@@ -49,7 +40,7 @@
     <!-- Script pour utiliser ECharts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.0.0/echarts.min.js"></script>
     
-	<script src="main.js"></script>
+	<script src="/main.js"></script>
     
   </body>
 </html>
