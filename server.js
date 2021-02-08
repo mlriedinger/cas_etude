@@ -1,19 +1,17 @@
-// Dépendances Express
+// Import des dépendances
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const ttn = require("ttn");
 
+// Import des constantes et méthodes nécessaires au routage, à l'insertion en BDD et à la connexion TTN
+const router = require("./routes/routes.js");
+const dbMethod = require("./model/model.js");
+const ttnConfig = require("./config/ttn.js");
+
 const app = express();
 
-const router = require("./routes/routes.js");
-
-//const db = require("./config/database.js");
-const dbMethod = require("./model/model.js");
-
-const appID = require("./config/appID.js");
-const accessKey = require("./config/accessKey.js");
-
+// Utilisation de middlewares pour parser le contenu du body d'une requête POST, 
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(cookieParser());
 app.use(router);
@@ -24,8 +22,8 @@ app.set('view engine', 'ejs');
 
 /* ------------------------------------------------------------------------- */
 
-// Réception des messages uplink de TTN
-ttn.data(appID, accessKey).then(function(client) {
+// Réception des messages uplink de TTN et enregistrement des données en BDD
+ttn.data(ttnConfig.appID, ttnConfig.accessKey).then(function(client) {
 		client.on("uplink", function(devID, payload) {
 			var data = []
 			data[0] = payload['payload_fields']['Power']

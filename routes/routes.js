@@ -1,8 +1,8 @@
-// Import Express
+// Import des dépendances
 const express = require("express");
 var path = require('path');
 
-// Initialisation du router Express
+// Import des constantes et méthodes nécessaires au routage, aux requêtes SELECT en BDD et à l'envoi de messages à TTN
 const router = express.Router();
 const db = require("../config/database.js");
 const arduino = require("../config/arduino.js");
@@ -63,7 +63,6 @@ router.get('/api/:name', function(req, res){
 
 // Envoie un message downlink à l'Arduino pour activer/désactiver la fonction tracker
 router.get('/api/trackermode/:id', function(req, res) {
-	
 	arduino.send(req.params.id, "01", 1);
 	console.log("Send trackermode to " + req.params.id);
 	res.send("tracker mode set");
@@ -99,13 +98,11 @@ router.get('/api/settemp/:id/:value', function(req, res) {
 });
 
 router.get('/main.js', function(req, res) {
-	console.log(path.resolve(__dirname + '/../controller/main.js'));
 	if(req.cookies['Connexion'] > 0) res.sendFile(path.resolve(__dirname + '/../controller/main.js'));
 	else res.render('index', {error: 'connexion'});
 });
 
 router.get('/style.css', function(req, res) {
-	console.log(path.resolve(__dirname + '/../views/style.css'));
 	if(req.cookies['Connexion'] > 0) res.sendFile(path.resolve(__dirname + '/../views/style.css'));
 	else res.render('index', {error: 'connexion'});
 });
