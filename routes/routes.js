@@ -25,7 +25,7 @@ router.post('/api/connexion/', function(req, res){
 	//console.log(req.body);
 	var data = db.query("SELECT login from users WHERE login='" + req.body.login + "' AND password='" + req.body.password +"'", function(err, result, fields){
 		if(err) throw err;
-		console.log(result.length);
+		//console.log(result.length);
 		if(result.length > 0) {
 			res.cookie('Connexion', Math.random().toString());
 			res.redirect('/monitoring');
@@ -38,26 +38,26 @@ router.post('/api/connexion/', function(req, res){
 
 // Récupère et renvoie les données de production totale de tous les panneaux
 router.get('/api/panels', function(req, res){
-	var data = db.query("SELECT name, location, SUM(production) AS total, date, temperature, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id GROUP BY name", function(err, result, fields) {
-	if(err) throw err;
-	res.send(result);
+	var data = db.query("SELECT name, location, SUM(production) AS total, date, (SELECT temperature from data ORDER BY date DESC LIMIT 1) as temperature, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id GROUP BY name", function(err, result, fields) {
+		if(err) throw err;
+		res.send(result);
 	});
 });
 
 // Récupère et renvoie la liste des noms des panneaux
 router.get('/api/list', function(req, res) {
 	var data = db.query("SELECT name, pseudo, picture, description, location FROM cabins", function(err, result, fields) {
-	if(err) throw err;
-	res.send(result);
+		if(err) throw err;
+		res.send(result);
 	});
 });
 
 // Récupère et renvoie les données de production d'un panneau au cours de la dernière heure écoulée
 router.get('/api/:name', function(req, res){
 	var data = db.query("SELECT production, date, pseudo FROM data INNER JOIN cabins ON data.fk_panel_id = cabins.id WHERE name = '" + req.params.name + "' AND date > ADDTIME((SELECT date FROM data ORDER BY date DESC LIMIT 1), '-1:00:00')", function(err, result, fields) {
-	if(err) throw err;
-	//console.log(result);
-	res.send(result);
+		if(err) throw err;
+		//console.log(result);
+		res.send(result);
 	});
 });
 
@@ -103,7 +103,7 @@ router.get('/main.js', function(req, res) {
 });
 
 router.get('/style.css', function(req, res) {
-	if(req.cookies['Connexion'] > 0) res.sendFile(path.resolve(__dirname + '/../views/style.css'));
+	if(req.cookies['Connexion'] > 0) res.sendFile(path.resolve(__dirname + '/../public/style.css'));
 	else res.render('index', {error: 'connexion'});
 });
 

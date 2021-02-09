@@ -8,16 +8,16 @@
       
     <div class="container-md">
       <header class="bg-dark mb-5 p-1">
-        <h2 class="mt-5">Solar Plexus</h2>
-        <h3 class="mb-5">Chakra Solutions</h3>
+        <h2 class="mt-5">Yolar Plexus</h2>
+        <h3 class="mb-5"><i class="fas fa-spa"></i>Chakra Solutions<i class="fas fa-spa"></i></h3>
       </header>
       
       <div class="row align-items-center mt-5 mr-5">
-            <div class="col-sm-8">      
-              <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Photo de chalet"/>
+            <div class="col-sm-5">      
+              <img id="home_logo" src="/img/yoda.svg" alt="Logo Yoda"/>
             </div>
              
-            <div class="col-sm-4">
+            <div class="col-sm-7">
               <form method="POST" action="/api/connexion">
                   <div class="mb-3">
                       <label for="login" class="form-label">Identifiant</label>
@@ -27,7 +27,7 @@
                   <div class="mb-3">
                       <label for="password" class="form-label">Mot de passe</label>
                       <input type="password" name="password" id="password" class="form-control"/>
-                      <%if (error == 'connexion') { %><div id="wrongPassword" style="color:red;">Mauvais mot de passe ! Essaie encore ...</div> <% } %>
+                      <%if (error == 'connexion') { %><div id="wrongPassword" style="color:#86A77A;">Mauvais mot de passe ! Essaie encore ...</div> <% } %>
                   </div>
                   <input type="submit" class="btn btn-dark btn-lg mt-3" value="Connexion" id="submit"/>
             </div>

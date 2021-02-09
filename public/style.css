@@ -1,0 +1,83 @@
+/* Style commun à toutes les pages */
+
+h2, h3 {
+	text-align: center;
+}
+
+body{
+	font-family: 'Bai Jamjuree', serif;
+}
+
+h1, h2{
+	font-family: 'Chakra Petch', serif;
+	font-size: 4vw;
+}
+
+/* Override de Bootstrap */
+
+.btn-dark, .bg-dark{
+	background-color:#3B3A40!important;
+}
+
+.btn-light{
+	background-color:#9EC18A!important;
+	border-color:#9EC18A!important;
+	color:#FFFFFF;
+}
+
+.btn-primary{
+	background-color:#86A77A!important;
+	border-color:#86A77A!important;
+}
+
+.btn-secondary{
+	background-color:#545358!important;
+	border-color:#545358!important;
+}
+
+
+/* Page d'accueil */
+
+#home_logo{
+	width:30vw;
+}
+
+h3, label{
+	font-family: 'Bai Jamjuree', serif;
+}
+
+h3{
+	font-size: 2vw;
+}
+
+header{
+	color:#FFFFFF;
+}
+
+
+/* Page monitoring */
+
+h1{
+	margin-top: 12vw;
+	margin-bottom: 5vw;
+}
+
+/* Navbar */
+i{
+	margin:0 0.5vw;
+}
+
+#logo {
+	width:6vw;
+	margin-right:0.5vw;
+}
+
+#yoda_dark{
+	width:15%;
+	margin-top: 5vw;
+	margin-bottom: 2vw;
+}
+
+
+
+

@@ -15,6 +15,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(cookieParser());
 app.use(router);
+app.use(express.static('public'));
 
 // On définit EJS comme moteur de visualisation pour rendre des vues
 app.set('view engine', 'ejs');
@@ -84,4 +85,6 @@ function flood(nb) {
 /* ------------------------------------------------------------------------- */
 
 // Express écoute le port 8080
-app.listen(8080);
+app.listen(8080, function(){
+	console.log('Listening on http://localhost:8080');
+});
