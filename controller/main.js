@@ -10,6 +10,7 @@ function getData() {
 			temperature[i] = data[i].temperature;
 			document.getElementById('setTemp'+ data[i].name).value =temperature[i];
 		}
+		document.getElementById('loading').style.display = 'none'; 
 		drawChart('Production totale des panneaux (en Kw/h)', data);
 	});
 };
@@ -44,20 +45,17 @@ function displayButtons(){
 		var location = dataPanels[i].location;
 		var picture = dataPanels[i].picture;
 		var description = dataPanels[i].description;
-		//console.log(picture);
 		
 		var divPanel = document.createElement("div");
 		divPanel.classList.add("col");
 		divPanel.classList.add("sm-6");
-		
-		//divPanel.innerHTML += "<div class='row'><button type='button' class='btn btn-dark mb-3 btn-sm' onclick='setTemp(\""+ name + "\")' id='tempBtn"+name+"' disabled>OK</button></div>";
 		
 		var html = [
 			'<div class="card mb-5">',
 				'<img src="' + picture + '" alt="Une photo de chalet" class="card-img-top" style="height: 200px"/>',
 				'<div class="card-body">',
 					'<h5 class="card-title" style="font-family: \'Chakra Petch\'; font-weight: bold;">'+ pseudo + " / " + location +'</h5>',
-					'<p class="card-text" style="text-align:justify; height: 220px;">' + description + '</p>',
+					'<p class="card-text" style="text-align:justify; height: 270px;">' + description + '</p>',
 				'</div>',				
 				'<ul class="list-group list-group-flush">',
 					'<li class="list-group-item d-grid gap-2 d-flex justify-content-md-center align-items-center">',
@@ -109,7 +107,7 @@ function drawChart(name, data){
 		title: {
 			text: name,
 			textStyle: {
-				fontFamily: 'Bai Jamjuree'
+				fontFamily: 'Bai Jamjuree',
 			}
 		},
 		tooltip: {
@@ -120,11 +118,9 @@ function drawChart(name, data){
 		},
 		xAxis: {
 			data: names,
-			fontWeight: 'bold',
 		},
 		yAxis: {
 			nameLocation: 'start',
-			fontWeight: 'bold',
 		},
 		series: [{
 			name: 'Production totale',
@@ -164,7 +160,10 @@ function drawChartPanel(name, data){
 	// Configuration du graphique et insertion des données
 	var option = {
 		title: {
-			text: name
+			text: name,
+			textStyle: {
+				fontFamily: 'Bai Jamjuree'
+			},
 		},
 		tooltip: {},
 		legend: {
@@ -207,14 +206,14 @@ function drawChartPanel(name, data){
 // Appelle la route qui envoie une trame à l'arduino pour activer/désactiver le suivi du soleil
 function trackerMode(id) {
 	axios.get('/api/trackermode/'+id).then(function(response) {
-		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-light btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-light btn-lg mt-3 mb-3';
+		document.getElementById("tracker_button_"+id).className = document.getElementById("tracker_button_"+id).className == 'btn btn-primary btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-primary btn-lg mt-3 mb-3';
 		console.log("tracker mode set")
 	});
 };
 
 // Appelle la route qui envoie une trame à l'arduino pour activer/désactiver l'envoi de données par l'Arduino
 function sendMode(id) {
-	document.getElementById("send_button_"+id).className = document.getElementById("send_button_"+id).className == 'btn btn-light btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-light btn-lg mt-3 mb-3';
+	document.getElementById("send_button_"+id).className = document.getElementById("send_button_"+id).className == 'btn btn-primary btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-primary btn-lg mt-3 mb-3';
 	
 	axios.get('/api/sendmode/'+id).then(function(response) {
 		console.log("send mode set")
@@ -233,7 +232,7 @@ function init(id) {
 function heatingMode(id) {
 	document.getElementById("setTemp"+id).disabled = !document.getElementById("setTemp"+id).disabled;
 	document.getElementById("tempBtn"+id).disabled = !document.getElementById("tempBtn"+id).disabled;
-	document.getElementById("heat_button_"+id).className = document.getElementById("heat_button_"+id).className == 'btn btn-light btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-light btn-lg mt-3 mb-3';
+	document.getElementById("heat_button_"+id).className = document.getElementById("heat_button_"+id).className == 'btn btn-primary btn-lg mt-3 mb-3' ? 'btn btn-danger btn-lg mt-3 mb-3' : 'btn btn-primary btn-lg mt-3 mb-3';
 	
 	axios.get('/api/heatingMode/'+id).then(function(response) {
 		console.log("heating mode set")

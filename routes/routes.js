@@ -103,8 +103,7 @@ router.get('/main.js', function(req, res) {
 });
 
 router.get('/style.css', function(req, res) {
-	if(req.cookies['Connexion'] > 0) res.sendFile(path.resolve(__dirname + '/../public/style.css'));
-	else res.render('index', {error: 'connexion'});
+	res.sendFile(path.resolve(__dirname + '/../public/style.css'));
 });
 
 module.exports = router;

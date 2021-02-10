@@ -35,6 +35,10 @@ h1, h2{
 	border-color:#545358!important;
 }
 
+.text-primary{
+	color: #86A77A!important;
+}
+
 
 /* Page d'accueil */
 
@@ -50,8 +54,8 @@ h3{
 	font-size: 2vw;
 }
 
-header{
-	color:#FFFFFF;
+header h2, h3{
+	color:#FFFFFF!important;
 }
 
 
