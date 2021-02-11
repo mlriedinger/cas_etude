@@ -23,10 +23,16 @@ const char *appKey = "93A6F6E2C974B0C09D66073F8B43B01E";
 #define loraSerial Serial1
 #define debugSerial Serial
 #define freqPlan TTN_FP_EU868
+//#define DEBUG 1
+#define TRACKER_X 1
+//#define TRACKER_Y 1
+
 
 unsigned long wait;
 unsigned power = 100;
 unsigned targetTemp = 20;
+int posPanelX = 0;
+int posPanelY = 0;
 
 byte i = 0;
 
@@ -35,9 +41,9 @@ Adafruit_INA219 powerSensor;
 
 ///////////
 
-#define SENSIBILITY 100
+#define SENSIBILITY 80
 
-#define DEGRES 10
+#define DEGRES 5
 
 #define X true
 #define Y false
@@ -49,6 +55,8 @@ uint16_t bottomLeft = 0;
 uint16_t bottomRight = 0;
 
 #define TEMP A0
+#define STOP_SENSOR_X A1
+#define STOP_SENSOR_Y A2
 
 //#define POWER_SENSOR A0
 
@@ -69,7 +77,10 @@ Adafruit_StepperMotor *motorY = AFMS.getStepper(200, 1);
 
 bool trackAuto = true;
 bool sendInfo = true;
-bool sendPower = true;
+bool sendHeat = false;
+
+
+///////////////// LoRa //////////////////////
 
 void loraSend(uint32_t production, uint32_t temp) {
 
@@ -86,28 +97,23 @@ void loraSend(uint32_t production, uint32_t temp) {
 
 }
 
-
-// Transforme les données du capteur de temp en degrés
-float readTemp() {
-  int valeur_brute = analogRead(TEMP);
-  float temperature = valeur_brute * (5.0 / 1023 * 100.0);
-  return temperature;
-}
-
 void callbackLora(const uint8_t *payload, size_t size, port_t port) {
 
+#ifdef DEBUG
   Serial.println("Message received");
 
   char p[10];
   sprintf(p, "%d", payload[0]);
 
   debugSerial.println(p);
+#endif
 
   // Regarde le premier byte du payload qu'il reçoit :
-  if (payload[0] < 4) {
-    if (payload[0] == 1) trackAuto = !trackAuto;
+  if (payload[0] < 5) {
+    if      (payload[0] == 1) trackAuto = !trackAuto;
     else if (payload[0] == 2) sendInfo = !sendInfo;
-    else if (payload[0] == 3) sendPower = !sendPower;
+    else if (payload[0] == 3) sendHeat = !sendHeat;
+    else if (payload[0] == 4) initPos();
   } else {
     Serial.print("more");
     targetTemp = payload[0];
@@ -116,21 +122,24 @@ void callbackLora(const uint8_t *payload, size_t size, port_t port) {
   delay(500);
 }
 
-// Fonction de récupération de valeur du capteur de courant :
-unsigned int getPower() {
+///////////// Puissance //////////////////////
 
-  float shuntvoltage = powerSensor.getShuntVoltage_mV();
-  float busvoltage = powerSensor.getBusVoltage_V();
-  float current_mA = powerSensor.getCurrent_mA();
-  float loadvoltage = busvoltage + (shuntvoltage / 1000);
+// Récupération de valeur du capteur de courant :
+unsigned getPower() {
 
-  Serial.print("Bus Voltage: "); Serial.print(busvoltage); Serial.println(" V");
-  Serial.print("Shunt Voltage: "); Serial.print(shuntvoltage); Serial.println(" mV");
-  Serial.print("Load Voltage: "); Serial.print(loadvoltage); Serial.println(" V");
-  Serial.print("Current: "); Serial.print(current_mA); Serial.println(" mA");
-  Serial.println("");
+  float shuntvoltage;
+  float busvoltage;
+  float current_mA;
+  float loadvoltage;
+  float power_mW;
+  
+  shuntvoltage = abs(powerSensor.getShuntVoltage_mV());
+  busvoltage = abs(powerSensor.getBusVoltage_V());
+  current_mA = abs(powerSensor.getCurrent_mA());
+  power_mW = abs(powerSensor.getPower_mW());
+  loadvoltage = abs(busvoltage + (shuntvoltage / 1000));
 
-  return (int) current_mA * loadvoltage;
+  return round(current_mA * loadvoltage);
 }
 
 unsigned getRandomPower(unsigned power) {
@@ -145,55 +154,128 @@ unsigned getRandomPower(unsigned power) {
   return power;
 }
 
-// Fonction qui suit le soleil en fonction des données des photorésistances :
-void tracker() {
 
-  // X :
-  if ((topLeft + topRight + SENSIBILITY) < (bottomLeft + bottomRight)) {
-    Serial.println("X LEFT");
-    rotate(X, 10, DEGRES, FOR);
-  }
-  else if ((topLeft + topRight) > (bottomLeft + bottomRight + SENSIBILITY)) {
-    Serial.println("X RIGHT");
-    rotate(X, 10, DEGRES, BACK);
-  }
-
-  // Y :
-  if ((topLeft + bottomLeft + SENSIBILITY) < (topRight + bottomRight)) {
-    Serial.println("Y LEFT");
-    rotate(Y, 10, DEGRES, FOR);
-  }
-  else if ((topLeft + bottomLeft) > (topRight + bottomRight + SENSIBILITY)) {
-    Serial.println("Y RIGHT");
-    rotate(X, 10, DEGRES, BACK);
-  }
-
-}
-
-// Fonction pour pouvoir faire bouger les moteures comme on le souhaite
-void rotate(bool motor, byte speed, unsigned int degree, bool sens) {
-  if (motor) {
-    motorX->setSpeed(speed);
-    motorX->step(degree, sens ? FORWARD : BACKWARD, SINGLE);
-  } else {
-    motorY->setSpeed(speed);
-    motorY->step(degree, sens ? FORWARD : BACKWARD, SINGLE);
-  }
+///////////// Chauffage ////////////////
+// Transforme les données du capteur de temp en degrés
+int readTemp() {
+  int valTemperature = analogRead(TEMP);
+  float volt = valTemperature * 5.0;
+  volt = volt / 1024.0;
+  return round((volt - 0.5) * 100);
 }
 
 // Chauffe si le capteur de température est plus bas que la température voulue.
 void heat() {
-  if ((int)readTemp < targetTemp) digitalWrite(RELAIS, true);
+  if (readTemp() < targetTemp) {
+    digitalWrite(RELAIS, HIGH);
+  } else if (readTemp() > targetTemp + 4) { // +4 = evite le jonglage entre allumé/éteint
+    digitalWrite(RELAIS, LOW);
+  }
 }
 
+
+///////////// Tracker ///////////////
+// Suit le soleil en fonction des données de la trame envoyée par l'Uno :
+void tracker() {
+
+#ifdef DEBUG
+  Serial.print("PosPanelY : "); Serial.println(posPanelY);  
+  Serial.print("PosPanelX : "); Serial.println(posPanelX);
+#endif
+
+#ifdef TRACKER_X
+  // X :
+  if (((topLeft + topRight) > (bottomLeft + bottomRight + SENSIBILITY)) && posPanelX <= 160) {
+#ifdef DEBUG
+    Serial.println("X UP");
+#endif
+    posPanelX += DEGRES;
+    rotate(X, 10, DEGRES, BACK);
+  }
+  else if (((topLeft + topRight) < (bottomLeft + bottomRight + SENSIBILITY)) && !isTouch(STOP_SENSOR_X)) {
+#ifdef DEBUG
+    Serial.println("X DOWN");
+#endif
+    posPanelX -= DEGRES;
+    rotate(X, 10, DEGRES, FOR);
+  }
+#endif
+
+#ifdef TRACKER_Y
+  // Y :
+  if ((topLeft + bottomLeft) < (topRight + bottomRight + SENSIBILITY) && posPanelY <= 400) {
+#ifdef DEBUG
+    Serial.println("Y LEFT");
+#endif
+    posPanelY += DEGRES;
+    for(byte i = 0; i < DEGRES; i++) {
+       rotate(Y, 254, DEGRES, FOR);
+    }
+  }
+  else if ((topLeft + bottomLeft) > (topRight + bottomRight + SENSIBILITY) && !isTouch(STOP_SENSOR_Y)) {
+#ifdef DEBUG
+    Serial.println("Y RIGHT");
+#endif
+    posPanelY -= DEGRES;
+    for(byte i = 0; i < DEGRES; i++) {
+       rotate(Y, 254, DEGRES, BACK);  
+    }
+  }
+#endif
+
+  if(isTouch(STOP_SENSOR_X)) posPanelX = 0;
+  if(isTouch(STOP_SENSOR_Y)) posPanelY = 0;
+}
+
+// Fait bouger les moteurs comme on le souhaite
+void rotate(bool motor, uint8_t speed, unsigned int degree, bool sens) {
+  if (motor) {
+    motorX->setSpeed(speed);
+    motorX->step(degree, sens ? FORWARD : BACKWARD, DOUBLE);
+  } else {
+    motorY->setSpeed(speed);
+    motorY->step(degree, sens ? FORWARD : BACKWARD, DOUBLE);
+  }
+}
+
+// Dit si un stop sensor est touché :
+boolean isTouch(unsigned test) {
+#ifdef DEBUG
+  Serial.println(analogRead(test));
+#endif
+  if(analogRead(test) < 10 || analogRead(test) > 1000) return false;
+  else return true;
+}
+
+// Initialise le panneaux en zéro X et zéro Y :
+void initPos() {
+#ifdef TRACKER_X
+  while(!isTouch(STOP_SENSOR_X))  {
+    rotate(X, 254, 1, FOR);
+    delay(50);
+  }
+#endif
+
+#ifdef TRACKER_Y
+  while(!isTouch(STOP_SENSOR_Y)) {
+    rotate(Y, 254, 1, BACK);
+  }
+#endif
+
+  posPanelX = 0;
+  posPanelY = 0;
+}
+
+// Split la trame envoyée par le Nano :
 void readSensors() {
   char buff[20 + 1];
 
   //memset(buff, 0, sizeof(buff));
-
+#ifdef DEBUG
   Serial.println("Read serial sensors");
 
   Serial.println(readSerial.available());
+#endif
 
   while (readSerial.available() > 0 && (buff[i] = readSerial.read()) != '\n' && i < 20) {
     //buff[i] = readSerial.read();
@@ -245,22 +327,29 @@ void readSensors() {
     buff2[j] = '\0';
     bottomRight = atoi(buff2);
     i++;
-
+#ifdef DEBUG
     Serial.print("Sensors : "); Serial.println(buff);
+#endif
     i = 0;
   }
 }
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println("Stepper test!");
-
   //pinMode(POWER_SENSOR, INPUT);
 
   pinMode(RELAIS, OUTPUT);
   pinMode(TEMP, INPUT);
   pinMode(2, OUTPUT);
+  pinMode(STOP_SENSOR_X, INPUT);
+  pinMode(STOP_SENSOR_Y, INPUT);
+  pinMode(0, OUTPUT);
+  
+  digitalWrite(STOP_SENSOR_X, HIGH);
+  digitalWrite(STOP_SENSOR_Y, HIGH);
+  
   digitalWrite(2, HIGH);
+  digitalWrite(0, HIGH);
 
   //digitalWrite(TEMP, false);
 
@@ -284,40 +373,38 @@ void setup() {
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
   wait = (int) millis() / 10000;
 
+  initPos();
+
 }
 
 void loop() {
-
-  Serial.println("=================");
-  Serial.println();
 
   // Si le tracker de soleil est activé, on lit les photorésistances et on lance le tracker suivant les valeures obtenues :
   if (trackAuto) {
     readSensors();
     tracker();
   }
-
-  // Si la fonction de suivie de température est activée, on lance la fonction de chauffage :
-  if (sendPower) heat();
+  
+  // Si le chauffage est activé, on lance la régulation de température :
+  if (sendHeat) heat();
   else digitalWrite(RELAIS, 0);
-
-  digitalWrite(RELAIS, sendPower);
 
   // Attend 10 secondes sans délais :
   if (millis() > wait + 10000) {
     wait = millis();
-    Serial.print("wait : "); Serial.println(wait);
-    power = getRandomPower(power);
+    power = getPower() * 10;
     loraSend(sendInfo ? power : 0, readTemp());
   }
 
-  //Serial.print("Power : "); Serial.println(analogRead(POWER_SENSOR));
+#ifdef DEBUG
+  Serial.println("=================");
+  Serial.println();
 
+  Serial.println(sendHeat ? "Chauffage allumé" : "Chauffage eteint");
   Serial.print("Temp voulue : "); Serial.println(targetTemp);
   Serial.print("Temp : "); Serial.println(readTemp());
+#endif
 
   delay(250);
-
-  digitalWrite(RELAIS, sendPower);
 
 }
