@@ -10,7 +10,7 @@ body{
 
 h1, h2{
 	font-family: 'Chakra Petch', serif;
-	font-size: 4vw;
+	font-size: 3em;
 }
 
 /* Override de Bootstrap */
@@ -62,8 +62,8 @@ header h2, h3{
 /* Page monitoring */
 
 h1{
-	margin-top: 12vw;
-	margin-bottom: 5vw;
+	margin-top: 3.5em;
+	margin-bottom: 1.5em;
 }
 
 /* Navbar */
@@ -77,11 +77,25 @@ i{
 }
 
 #yoda_dark{
-	width:15%;
-	margin-top: 5vw;
-	margin-bottom: 2vw;
+	width:15vw;
+	margin-top: 2em;
+	margin-bottom: 1.5em;
+}
+@media screen and (max-width:720px){
+	#yoda_dark{
+		width:35vw;
+		margin-top: 0em;
+		margin-bottom: 0.5em;
+	}
+	h2{
+		margin-top:0.5em!important;
+		margin-bottom:0.5em!important;
+	}
 }
 
+nav{
+	margin-bottom:2em;
+}
 
 
 

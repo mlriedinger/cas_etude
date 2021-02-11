@@ -11,7 +11,7 @@ function getData() {
 			document.getElementById('setTemp'+ data[i].name).value =temperature[i];
 		}
 		document.getElementById('loading').style.display = 'none'; 
-		drawChart('Production totale des panneaux (en Kw/h)', data);
+		drawChart('Production totale (en Kw/h)', data);
 	});
 };
 
@@ -155,7 +155,8 @@ function drawChartPanel(name, data){
 	// Initialise une instance ECharts dans la <div> "panelProductionChart"
 	var myChart = echarts.init(document.getElementById('panelProductionChart'));
 	// Force le graphique à prendre une largeur de 1100px (obligatoire pour être affiché correctement dans la fenêtre modale !)
-	myChart.resize({'width': '1100px'});
+	if(screen.width < 1300) myChart.resize({'width': screen.width * 0.9});
+	else myChart.resize({'width': (screen.width /1.8)});
 	
 	// Configuration du graphique et insertion des données
 	var option = {
